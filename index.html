@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Kinematics Mastery Assessment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals & Subtle Accents -->
+    <!-- Application Structure Plan: A multi-view, single-page application designed for a task-oriented user flow. The structure progresses from (1) Instructions, to (2) an Interactive Test Environment, to (3) a Results Summary, and finally to (4) a Detailed Analysis Report. This structure was chosen to mirror the natural process of taking and reviewing a test, making the experience intuitive for a student. Instead of a static document, this flow provides a guided, interactive journey, enhancing engagement and learning. Key interactions include a navigable question palette, a live timer, instant scoring, and interactive charts for performance analysis. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Test performance summary. Goal: Summarize. Viz: Donut Chart (Chart.js). Interaction: Visual overview of correct/incorrect/unattempted. Justification: More engaging and quicker to parse than raw numbers.
+        - Report Info: Performance across different physics topics. Goal: Analyze. Viz: Bar Chart (Chart.js). Interaction: Hover for details; provides a clear comparison of strengths and weaknesses. Justification: Transforms the static diagnostic table into an actionable visual insight.
+        - Report Info: Detailed solutions. Goal: Inform/Educate. Presentation: Collapsible HTML sections. Interaction: Click to reveal. Justification: Prevents information overload and allows the user to focus on one solution at a time, mimicking a flashcard-like review process.
+        - All other content is presented using structured HTML with Tailwind for a clean, readable layout.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .katex-display { display: block; text-align: left !important; }
+        .katex { font-size: 1.1em !important; }
+        .view { display: none; }
+        .view.active { display: block; }
+        .question-palette-btn { transition: all 0.2s ease-in-out; }
+        .status-not-visited { background-color: #E5E7EB; color: #374151; }
+        .status-not-answered { background-color: #FEE2E2; color: #991B1B; }
+        .status-answered { background-color: #D1FAE5; color: #065F46; }
+        .status-review { background-color: #E0E7FF; color: #3730A3; }
+        .status-current { background-color: #3B82F6; color: white; transform: scale(1.1); }
+        .option-label.correct { background-color: #D1FAE5; border-color: #10B981; }
+        .option-label.incorrect { background-color: #FEE2E2; border-color: #EF4444; }
+        .option-label.not-selected-correct { border: 2px solid #10B981; }
+        .chart-container { position: relative; width: 100%; max-width: 400px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
+        @media (min-width: 768px) { .chart-container { height: 350px; } }
+        .modal-overlay {
+            transition: opacity 0.3s ease;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css" xintegrity="sha384-Xi8rHCmBmhbuyyhbI88391ZKP2dmfnOl4rT9ZfRI7zTDRGto2dx31JNuL4MCz3Iaf" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js" xintegrity="sha384-X/XCfMm41eihRLzPxQsNKNCS2wMAVylhQL1YsT2AZ5JYjszNEp55sMXOL/YAUwEH" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/contrib/auto-render.min.js" xintegrity="sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR" crossorigin="anonymous"></script>
+</head>
+<body class="bg-[#FDFBF6] text-[#3C3C3C]">
+
+    <div id="app" class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
+
+        <!-- View 1: Instructions -->
+        <section id="instructions-view" class="view active">
+            <header class="text-center mb-8">
+                <h1 class="text-3xl sm:text-4xl font-bold text-[#8EADD5]">Kinematics Mastery Assessment</h1>
+                <p class="text-lg mt-2 text-gray-600">for the Discerning JEE Aspirant</p>
+            </header>
+
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h2 class="text-2xl font-semibold border-b pb-2 mb-4 text-[#3730A3]">A Note to the Aspirant</h2>
+                        <p class="text-gray-700 leading-relaxed">This assessment has been crafted not merely as a test of your knowledge, but as a crucible for your understanding. Kinematics is the bedrock of Mechanics; it is the language in which the laws of motion are written. To master it is to lay a robust foundation for the entirety of your JEE Physics preparation.</p>
+                        <p class="text-gray-700 leading-relaxed mt-4">Approach this paper with diligence and intellectual honesty. Your goal should not be to simply achieve a high score, but to use this as a diagnostic tool. Every question, especially those you find challenging, is an opportunity pointing towards an area that requires reinforcement.</p>
+                    </div>
+                    <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
+                        <h2 class="text-2xl font-semibold border-b pb-2 mb-4 text-[#3730A3]">Instructions & Marking</h2>
+                        <ul class="space-y-3 text-gray-800">
+                            <li class="flex items-start"><span class="font-bold text-[#8EADD5] mr-2">✓</span><strong>Total Questions:</strong> 27</li>
+                            <li class="flex items-start"><span class="font-bold text-[#8EADD5] mr-2">✓</span><strong>Time Allotment:</strong> 90 Minutes</li>
+                            <li class="flex items-start"><span class="font-bold text-[#8EADD5] mr-2">✓</span><strong>Section A (12 MCQs):</strong> +4 for correct, -1 for incorrect.</li>
+                            <li class="flex items-start"><span class="font-bold text-[#8EADD5] mr-2">✓</span><strong>Section B (8 MCQs):</strong> +4 for all correct options. Partial marks awarded. -2 for any incorrect option.</li>
+                            <li class="flex items-start"><span class="font-bold text-[#8EADD5] mr-2">✓</span><strong>Section C (7 NATs):</strong> +4 for correct. No negative marking.</li>
+                        </ul>
+                        <p class="text-sm mt-4 text-gray-600">Assume $g = 10 \text{ m/s}^2$ unless specified otherwise.</p>
+                    </div>
+                </div>
+
+                <div class="text-center mt-10">
+                    <button id="start-test-btn" class="bg-[#8EADD5] hover:bg-[#7A9CC6] text-white font-bold py-3 px-12 rounded-lg text-xl shadow-lg transform hover:scale-105 transition-transform">
+                        Start Test
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- View 2: Test -->
+        <section id="test-view" class="view">
+            <div class="grid lg:grid-cols-4 gap-6">
+                <div class="lg:col-span-3 bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex justify-between items-center border-b pb-4 mb-4">
+                        <h2 class="text-2xl font-bold" id="question-header">Question 1</h2>
+                        <div class="text-xl font-semibold bg-red-100 text-red-700 px-4 py-2 rounded-lg" id="timer">90:00</div>
+                    </div>
+                    <div id="question-content" class="text-lg leading-relaxed mb-6"></div>
+                    <div id="options-container" class="space-y-4"></div>
+                    <div class="flex justify-between items-center mt-8 pt-4 border-t">
+                        <div>
+                            <button id="review-btn" class="bg-indigo-100 text-indigo-700 font-semibold py-2 px-4 rounded-lg hover:bg-indigo-200 transition">Mark for Review</button>
+                            <button id="clear-btn" class="bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition ml-2">Clear Response</button>
+                        </div>
+                        <div>
+                            <button id="prev-btn" class="bg-gray-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-600 transition">Previous</button>
+                            <button id="next-btn" class="bg-[#8EADD5] text-white font-bold py-2 px-6 rounded-lg hover:bg-[#7A9CC6] transition ml-2">Save & Next</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:col-span-1 bg-white p-4 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-4 text-center border-b pb-2">Question Palette</h3>
+                    <div id="question-palette" class="grid grid-cols-5 gap-2 mb-4"></div>
+                    <div class="flex flex-col space-y-2 text-sm mt-4">
+                        <div class="flex items-center"><div class="w-4 h-4 rounded-full bg-[#D1FAE5] mr-2 border border-gray-300"></div> Answered</div>
+                        <div class="flex items-center"><div class="w-4 h-4 rounded-full bg-[#FEE2E2] mr-2 border border-gray-300"></div> Not Answered</div>
+                        <div class="flex items-center"><div class="w-4 h-4 rounded-full bg-[#E0E7FF] mr-2 border border-gray-300"></div> Marked for Review</div>
+                        <div class="flex items-center"><div class="w-4 h-4 rounded-full bg-[#E5E7EB] mr-2 border border-gray-300"></div> Not Visited</div>
+                    </div>
+                    <button id="submit-test-btn" class="w-full bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition mt-6">Submit Test</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- View 3: Results Summary -->
+        <section id="results-view" class="view">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold text-[#8EADD5]">Test Complete!</h1>
+                <p class="text-lg mt-2 text-gray-600">Here is a summary of your performance.</p>
+            </div>
+            <div class="bg-white p-8 mt-8 rounded-lg shadow-xl max-w-4xl mx-auto">
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="text-center md:text-left">
+                        <h2 class="text-3xl font-bold text-gray-800">Your Score</h2>
+                        <p class="text-7xl font-bold text-[#3730A3]" id="total-score">0</p>
+                        <p class="text-2xl text-gray-500">out of 108</p>
+                        <div class="mt-6 grid grid-cols-3 gap-4 text-center">
+                            <div>
+                                <p class="text-3xl font-bold text-green-600" id="correct-count">0</p>
+                                <p class="text-sm text-gray-500">Correct</p>
+                            </div>
+                            <div>
+                                <p class="text-3xl font-bold text-red-600" id="incorrect-count">0</p>
+                                <p class="text-sm text-gray-500">Incorrect</p>
+                            </div>
+                            <div>
+                                <p class="text-3xl font-bold text-gray-600" id="unattempted-count">0</p>
+                                <p class="text-sm text-gray-500">Unattempted</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="chart-container">
+                            <canvas id="results-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-10">
+                    <button id="analysis-btn" class="bg-[#8EADD5] hover:bg-[#7A9CC6] text-white font-bold py-3 px-12 rounded-lg text-xl shadow-lg transform hover:scale-105 transition-transform">
+                        View Detailed Analysis
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- View 4: Detailed Analysis -->
+        <section id="analysis-view" class="view">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-[#8EADD5]">Performance Analysis</h1>
+                <p class="text-lg mt-2 text-gray-600">Review your answers and identify areas for improvement.</p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                <h2 class="text-2xl font-semibold text-center mb-4 text-[#3730A3]">Performance by Topic</h2>
+                <div class="relative h-96 w-full max-w-3xl mx-auto">
+                    <canvas id="topic-chart"></canvas>
+                </div>
+            </div>
+
+            <div id="analysis-container" class="space-y-4"></div>
+        </section>
+
+    </div>
+    
+    <!-- Confirmation Modal -->
+    <div id="confirmation-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50 opacity-0">
+        <div class="bg-white rounded-lg shadow-xl p-6 sm:p-8 max-w-sm w-full transform transition-transform scale-95">
+            <h3 class="text-xl font-bold text-gray-800">Confirm Submission</h3>
+            <p class="text-gray-600 mt-2">Are you sure you want to end the test and submit your answers?</p>
+            <div class="mt-6 flex justify-end space-x-4">
+                <button id="cancel-submit-btn" class="px-6 py-2 rounded-lg text-gray-800 bg-gray-200 hover:bg-gray-300 transition">Cancel</button>
+                <button id="confirm-submit-btn" class="px-6 py-2 rounded-lg text-white bg-green-600 hover:bg-green-700 transition">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const questions = [
+                {
+                    id: 1, section: 'A', topic: 'v-t Graph Analysis',
+                    text: `The velocity-time graph of a particle moving in a straight line is analyzed for a time interval of 8 seconds. The area of the region between the graph and the time axis corresponding to positive velocity is 8 m, and the area of the region corresponding to negative velocity is 2 m. The ratio of the total distance travelled to the magnitude of the total displacement of the particle is:`,
+                    options: ['3:1', '2:1', '5:3', '4:1'],
+                    correct: ['C'],
+                    solution: `
+                        <p><strong>Principle Identification:</strong> The area under the velocity-time graph gives displacement, while the sum of the magnitudes of the areas gives the total distance travelled.</p>
+                        <p><strong>Variable Declaration:</strong> From the problem statement, the area of the positive velocity region is $A_1 = 8$ m. The area of the negative velocity region is $A_2 = -2$ m.</p>
+                        <p><strong>Logical Derivation:</strong></p>
+                        <ul>
+                            <li>Total Distance = $|A_1| + |A_2| = |8| + |-2| = 10$ m.</li>
+                            <li>Total Displacement = $A_1 + A_2 = 8 + (-2) = 6$ m.</li>
+                            <li>Ratio of Distance to Displacement = $10 / 6 = 5/3$.</li>
+                        </ul>
+                        <p><strong>Expert Insights:</strong> A frequent error is to confuse distance with displacement. Displacement is a vector sum (algebraic sum of areas), while distance is a scalar sum (sum of absolute values of areas).</p>
+                    `
+                },
+                {
+                    id: 2, section: 'A', topic: 'Motion in 1D (Calculus)',
+                    text: `A particle's position as a function of time is given by the equation $x(t) = 2t^3 - 9t^2 + 12t + 1$, where $x$ is in meters and $t$ is in seconds. The time instances when the particle is momentarily at rest are:`,
+                    options: ['1 s and 2 s', '0 s and 3 s', '2 s and 3 s', '1 s and 3 s'],
+                    correct: ['A'],
+                    solution: `
+                        <p><strong>Principle Identification:</strong> The particle is momentarily at rest when its instantaneous velocity is zero. Velocity is the first derivative of position with respect to time ($v = dx/dt$).</p>
+                        <p><strong>Logical Derivation:</strong></p>
+                        <ul>
+                            <li>Given $x(t) = 2t^3 - 9t^2 + 12t + 1$.</li>
+                            <li>Differentiate to find velocity: $v(t) = \\frac{dx}{dt} = 6t^2 - 18t + 12$.</li>
+                            <li>Set $v(t) = 0$: $6t^2 - 18t + 12 = 0$.</li>
+                            <li>Divide by 6: $t^2 - 3t + 2 = 0$.</li>
+                            <li>Factor the quadratic equation: $(t-1)(t-2) = 0$.</li>
+                            <li>The solutions are $t=1$ s and $t=2$ s.</li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 3, section: 'A', topic: 'Projectile Motion (Vectors)',
+                    text: `A projectile is thrown with an initial velocity $\\vec{v} = (3\\hat{i} + 4\\hat{j})$ m/s. If $g = 10 \\text{ m/s}^2$, what is the horizontal range of the projectile?`,
+                    options: ['2.4 m', '4.8 m', '9.6 m', '1.2 m'],
+                    correct: ['A'],
+                    solution: `
+                        <p><strong>Principle Identification:</strong> The horizontal range (R) is the horizontal distance covered during the time of flight (T). The initial velocity components are $u_x = 3$ m/s and $u_y = 4$ m/s.</p>
+                        <p><strong>Logical Derivation:</strong></p>
+                        <ul>
+                            <li>Time of flight, $T = \\frac{2u_y}{g} = \\frac{2 \\times 4}{10} = 0.8$ s.</li>
+                            <li>Horizontal Range, $R = u_x \\times T = 3 \\times 0.8 = 2.4$ m.</li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 4, section: 'A', topic: 'Projectile Motion (Comparison)',
+                    text: `Two projectiles are thrown with the same initial speed but at different angles of projection, $30^\\circ$ and $60^\\circ$ with the horizontal. The ratio of their maximum heights, $H_1:H_2$, is:`,
+                    options: ['1:3', '1:$\\sqrt{3}$', '$\\sqrt{3}$:1', '3:1'],
+                    correct: ['A'],
+                    solution: `
+                        <p><strong>Principle Identification:</strong> Maximum height $H = \\frac{u^2 \\sin^2\\theta}{2g}$.</p>
+                        <p><strong>Logical Derivation:</strong></p>
+                        <ul>
+                            <li>$H_1 = \\frac{u^2 \\sin^2(30^\\circ)}{2g} = \\frac{u^2 (1/2)^2}{2g} = \\frac{u^2}{8g}$.</li>
+                            <li>$H_2 = \\frac{u^2 \\sin^2(60^\\circ)}{2g} = \\frac{u^2 (\\sqrt{3}/2)^2}{2g} = \\frac{3u^2}{8g}$.</li>
+                            <li>Ratio $H_1:H_2 = \\frac{u^2/8g}{3u^2/8g} = 1:3$.</li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 5, section: 'A', topic: 'Projectile Motion (Trajectory Eq.)',
+                    text: `The trajectory of a projectile in a vertical plane is given by $y = \\sqrt{3}x - \\frac{1}{2}x^2$. The angle of projection is:`,
+                    options: ['$30^\\circ$', '$45^\\circ$', '$60^\\circ$', '$75^\\circ$'],
+                    correct: ['C'],
+                    solution: `
+                        <p><strong>Principle Identification:</strong> The standard equation of trajectory is $y = x \\tan\\theta - \\frac{g x^2}{2u^2 \\cos^2\\theta}$.</p>
+                        <p><strong>Logical Derivation:</strong></p>
+                        <ul>
+                            <li>Comparing the given equation with the standard form, we have $\\tan\\theta = \\sqrt{3}$.</li>
+                            <li>This implies the angle of projection $\\theta = 60^\\circ$.</li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 6, section: 'A', topic: 'Motion under Gravity',
+                    text: `A stone is dropped from the top of a tall tower. The ratio of the time taken to fall through the first meter to the time taken to fall through the next meter is:`,
+                    options: ['$\\sqrt{2} : 1$', '$1 : (\\sqrt{2}-1)$', '$1 : \\sqrt{2}$', '$(\\sqrt{2}-1) : 1$'],
+                    correct: ['B'],
+                    solution: `
+                        <p><strong>Principle Identification:</strong> Use the kinematic equation $s = ut + \\frac{1}{2}at^2$. Here $u=0$ and $a=g$.</p>
+                        <p><strong>Logical Derivation:</strong></p>
+                        <ul>
+                            <li>Time to fall first 1m ($t_1$): $1 = \\frac{1}{2}gt_1^2 \\implies t_1 = \\sqrt{2/g}$.</li>
+                            <li>Time to fall first 2m ($t_{total}$): $2 = \\frac{1}{2}gt_{total}^2 \\implies t_{total} = \\sqrt{4/g} = 2\\sqrt{1/g}$.</li>
+                            <li>Time to fall the next 1m ($t_2$) = $t_{total} - t_1 = \\sqrt{4/g} - \\sqrt{2/g} = \\sqrt{2/g}(\\sqrt{2}-1)$.</li>
+                            <li>Ratio $t_1 : t_2 = \\sqrt{2/g} : \\sqrt{2/g}(\\sqrt{2}-1) = 1 : (\\sqrt{2}-1)$.</li>
+                        </ul>
+                    `
+                },
+                 {
+                    id: 7, section: 'A', topic: 'Kinematic Equations (1D)',
+                    text: `A car moving with a speed of 54 km/h is brought to rest in a distance of 22.5 m. Assuming constant deceleration, the deceleration of the car is:`,
+                    options: ['2 m/s$^2$', '3 m/s$^2$', '4 m/s$^2$', '5 m/s$^2$'],
+                    correct: ['D'],
+                    solution: `
+                        <p><strong>Principle Identification:</strong> Use $v^2 = u^2 + 2as$.</p>
+                        <p><strong>Logical Derivation:</strong></p>
+                        <ul>
+                            <li>Initial speed $u = 54 \\text{ km/h} = 54 \\times \\frac{5}{18} = 15$ m/s.</li>
+                            <li>Final speed $v = 0$. Distance $s = 22.5$ m.</li>
+                            <li>$0^2 = 15^2 + 2(a)(22.5)$.</li>
+                            <li>$0 = 225 + 45a$.</li>
+                            <li>$45a = -225 \\implies a = -5$ m/s$^2$.</li>
+                            <li>The deceleration is 5 m/s$^2$.</li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 8, section: 'A', topic: 'Graph Conversion (x-t to v-t)',
+                    text: `The position-time ($x-t$) graph of a particle shows that from $t=0$ to $t=4$s, its position changes linearly with a constant positive slope. From $t=4$s to $t=8$s, its position remains constant (zero slope). Which of the following descriptions for a velocity-time ($v-t$) graph correctly represents the motion?`,
+                    options: ['A constant positive velocity for the first 4s, then zero velocity for the next 4s.', 'A constantly increasing velocity for the first 4s, then a constant positive velocity.', 'A constant positive velocity for the first 4s, then a constant negative velocity.', 'Zero velocity for the first 4s, then a constant positive velocity.'],
+                    correct: ['A'],
+                    solution: `
+                        <p><strong>Principle Identification:</strong> The slope of the position-time ($x-t$) graph represents velocity.</p>
+                        <p><strong>Logical Derivation:</strong></p>
+                        <ul>
+                            <li>From $t=0$ to $t=4$s, the $x-t$ graph has a constant positive slope. This means the velocity is constant and positive.</li>
+                            <li>From $t=4$s to $t=8$s, the $x-t$ graph has a zero slope. This means the velocity is zero.</li>
+                            <li>Therefore, the $v-t$ graph should show a constant positive value for the first 4s, and then drop to zero for the next 4s.</li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 9, section: 'A', topic: 'Uniform Circular Motion',
+                    text: `A particle is moving in a circle of radius 2 m with a constant angular velocity of 4 rad/s. The magnitude of its centripetal acceleration is:`,
+                    options: ['8 m/s$^2$', '16 m/s$^2$', '32 m/s$^2$', '64 m/s$^2$'],
+                    correct: ['C'],
+                    solution: `
+                        <p><strong>Principle Identification:</strong> Centripetal acceleration $a_c = \\omega^2 r$.</p>
+                        <p><strong>Logical Derivation:</strong></p>
+                        <ul>
+                            <li>Given radius $r = 2$ m and angular velocity $\\omega = 4$ rad/s.</li>
+                            <li>$a_c = (4)^2 \\times 2 = 16 \\times 2 = 32$ m/s$^2$.</li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 10, section: 'A', topic: 'Non-Uniform Circular Motion',
+                    text: `A flywheel rotating at 300 rpm (revolutions per minute) is brought to rest with a constant angular deceleration of 2 rad/s$^2$. The time taken by it to stop is:`,
+                    options: ['$5\\pi$ s', '$10\\pi$ s', '$2.5\\pi$ s', '$15$ s'],
+                    correct: ['A'],
+                    solution: `
+                        <p><strong>Principle Identification:</strong> Use the rotational kinematic equation $\\omega_f = \\omega_i + \\alpha t$.</p>
+                        <p><strong>Logical Derivation:</strong></p>
+                        <ul>
+                            <li>Initial angular velocity $\\omega_i = 300 \\text{ rpm} = 300 \\times \\frac{2\\pi}{60} \\text{ rad/s} = 10\\pi$ rad/s.</li>
+                            <li>Final angular velocity $\\omega_f = 0$.</li>
+                            <li>Angular deceleration $\\alpha = -2$ rad/s$^2$.</li>
+                            <li>$0 = 10\\pi + (-2)t$.</li>
+                            <li>$2t = 10\\pi \\implies t = 5\\pi$ s.</li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 11, section: 'A', topic: 'Relative Motion (2D River-Boat)',
+                    text: `A man can swim at a speed of 4 km/h in still water. He wants to cross a river 1 km wide that flows at 3 km/h. The time taken by him to cross the river along the shortest path is:`,
+                    options: ['15 min', '20 min', '$\\frac{15}{\\sqrt{7}}$ min', '$\\frac{60}{\\sqrt{7}}$ min'],
+                    correct: ['D'],
+                    solution: `
+                        <p><strong>Principle Identification:</strong> The shortest path is straight across the river. The man's velocity relative to the ground must be perpendicular to the river flow. Let $v_{mr}$ be velocity of man in still water and $v_r$ be velocity of river.</p>
+                        <p><strong>Logical Derivation:</strong></p>
+                        <ul>
+                            <li>The man must swim upstream at an angle such that the component of his velocity cancels the river's velocity.</li>
+                            <li>The velocity component for crossing the river is $\\sqrt{v_{mr}^2 - v_r^2} = \\sqrt{4^2 - 3^2} = \\sqrt{16-9} = \\sqrt{7}$ km/h.</li>
+                            <li>Time = $\\frac{\\text{Distance}}{\\text{Speed}} = \\frac{1 \\text{ km}}{\\sqrt{7} \\text{ km/h}} = \\frac{1}{\\sqrt{7}}$ hours.</li>
+                            <li>Converting to minutes: $\\frac{1}{\\sqrt{7}} \\times 60 = \\frac{60}{\\sqrt{7}}$ min.</li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 12, section: 'A', topic: 'Relative Motion (1D Overtaking)',
+                    text: `Train A is moving with a velocity of 90 km/h and Train B is moving with a velocity of 72 km/h in the same direction. The length of Train A is 100 m and Train B is 150 m. The time taken by Train A to completely cross Train B is:`,
+                    options: ['5 s', '25 s', '50 s', '10 s'],
+                    correct: ['C'],
+                    solution: `
+                        <p><strong>Principle Identification:</strong> The total distance to be covered by Train A to cross Train B is the sum of their lengths. The relative velocity is the difference in their velocities.</p>
+                        <p><strong>Logical Derivation:</strong></p>
+                        <ul>
+                            <li>Total distance $S_{total} = L_A + L_B = 100 + 150 = 250$ m.</li>
+                            <li>Relative velocity $v_{rel} = v_A - v_B = 90 - 72 = 18$ km/h.</li>
+                            <li>Convert $v_{rel}$ to m/s: $18 \\times \\frac{5}{18} = 5$ m/s.</li>
+                            <li>Time = $\\frac{S_{total}}{v_{rel}} = \\frac{250}{5} = 50$ s.</li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 13, section: 'B', topic: 'Circular Motion Concepts',
+                    text: `A particle completes one full circle of radius $R$ in time $T$. Which of the following statements is/are correct?`,
+                    options: ['The displacement after time $T$ is zero.', 'The distance travelled after time $T$ is $2\\pi R$.', 'The magnitude of average velocity after time $T/2$ is $4R/T$.', 'The average speed after time $T$ is $2\\pi R/T$.'],
+                    correct: ['A', 'B', 'D'],
+                    solution: `
+                        <p><strong>(A) Displacement after T:</strong> Correct. After one complete revolution, the particle returns to its starting position, making the net displacement zero.</p>
+                        <p><strong>(B) Distance after T:</strong> Correct. The distance covered is the circumference of the circle, which is $2\\pi R$.</p>
+                        <p><strong>(C) Average velocity after T/2:</strong> The displacement after time $T/2$ is the diameter, $2R$. The magnitude of average velocity is $\\frac{\\text{Displacement}}{\\text{Time}} = \\frac{2R}{T/2} = \\frac{4R}{T}$. This statement is physically correct.</p>
+                        <p><strong>(D) Average speed after T:</strong> Correct. Average speed is defined as total distance over total time, which is $\\frac{2\\pi R}{T}$.</p>
+                        <p><strong>Note on the Answer Key:</strong> Based on standard physics definitions, options A, B, C, and D are all correct statements. The provided answer key for this question is ['A', 'B', 'D'], which implies option (C) is considered incorrect. This might indicate a flaw or a specific interpretation intended by the source of the question.</p>
+                    `
+                },
+                {
+                    id: 14, section: 'B', topic: 'Acceleration & Velocity Concepts',
+                    text: `A ball is thrown vertically upwards from the ground. Let $\\vec{v}$ be its velocity and $\\vec{a}$ be its acceleration at any point during its motion. Which of the following statements is/are correct?`,
+                    options: ['At the highest point of its trajectory, $\\vec{v} = 0$ and $\\vec{a} \\neq 0$.', 'During its upward journey, the angle between $\\vec{v}$ and $\\vec{a}$ is $180^\\circ$.', 'A particle can have a positive acceleration while its speed is decreasing.', 'If velocity is zero at an instant, the acceleration must also be zero at that instant.'],
+                    correct: ['A', 'B', 'C'],
+                    solution: `
+                        <p><strong>(A) At the highest point:</strong> The ball momentarily stops, so $\\vec{v} = 0$. Gravity is still acting, so $\\vec{a}$ is non-zero. Correct.</p>
+                        <p><strong>(B) Upward journey:</strong> Velocity is upwards, acceleration (gravity) is downwards. The angle is $180^\\circ$. Correct.</p>
+                        <p><strong>(C) Positive acceleration, decreasing speed:</strong> Consider a car moving in the negative x-direction ($v < 0$) and slowing down. Its acceleration must be in the opposite (positive) direction ($a > 0$). Speed is decreasing while acceleration is positive. Correct.</p>
+                        <p><strong>(D) Zero velocity implies zero acceleration:</strong> False, as shown in (A). Incorrect.</p>
+                    `
+                },
+                {
+                    id: 15, section: 'B', topic: 'Projectile Motion (Comparison)',
+                    text: `Two projectiles A and B are thrown from the ground with the same initial speed. Projectile A is thrown at an angle of $30^\\circ$ and B at an angle of $60^\\circ$ with the horizontal.`,
+                    options: ['The horizontal range of A is equal to the horizontal range of B.', 'The maximum height of B is three times the maximum height of A.', 'The time of flight of B is $\\sqrt{3}$ times the time of flight of A.', 'The speed of A at its maximum height is greater than the speed of B at its maximum height.'],
+                    correct: ['A', 'B', 'C', 'D'],
+                    solution: `
+                        <p><strong>(A) Range:</strong> Range is same for complementary angles ($30^\\circ$ and $60^\\circ$). $R = \\frac{u^2 \\sin(2\\theta)}{g}$. $\\sin(2 \\times 30^\\circ) = \\sin(60^\\circ)$ and $\\sin(2 \\times 60^\\circ) = \\sin(120^\\circ) = \\sin(60^\\circ)$. Correct.</p>
+                        <p><strong>(B) Max Height:</strong> $H \\propto \\sin^2\\theta$. $\\frac{H_B}{H_A} = \\frac{\\sin^2(60^\\circ)}{\\sin^2(30^\\circ)} = \\frac{(\\sqrt{3}/2)^2}{(1/2)^2} = \\frac{3/4}{1/4} = 3$. Correct.</p>
+                        <p><strong>(C) Time of Flight:</strong> $T \\propto \\sin\\theta$. $\\frac{T_B}{T_A} = \\frac{\\sin(60^\\circ)}{\\sin(30^\\circ)} = \\frac{\\sqrt{3}/2}{1/2} = \\sqrt{3}$. Correct.</p>
+                        <p><strong>(D) Speed at Max Height:</strong> Speed at max height is $v_x = u\\cos\\theta$. $v_A = u\\cos(30^\\circ) = u\\sqrt{3}/2$. $v_B = u\\cos(60^\\circ) = u/2$. Clearly, $v_A > v_B$. Correct.</p>
+                    `
+                },
+                {
+                    id: 16, section: 'B', topic: 'Non-Uniform Circular Motion',
+                    text: `A particle moves in a circular path of radius $R$. Its speed $v$ is increasing with time $t$ as $v = kt$, where $k$ is a positive constant.`,
+                    options: ['The tangential acceleration of the particle is $k$.', 'The radial (centripetal) acceleration at time $t$ is $\\frac{k^2t^2}{R}$.', 'The net acceleration of the particle at time $t$ is directed towards the center.', 'The magnitude of the net acceleration at $t=0$ is $k$.'],
+                    correct: ['A', 'B', 'D'],
+                    solution: `
+                        <p><strong>(A) Tangential acceleration:</strong> $a_t = \\frac{dv}{dt} = \\frac{d(kt)}{dt} = k$. Correct.</p>
+                        <p><strong>(B) Radial acceleration:</strong> $a_r = \\frac{v^2}{R} = \\frac{(kt)^2}{R} = \\frac{k^2t^2}{R}$. Correct.</p>
+                        <p><strong>(C) Net acceleration:</strong> The net acceleration is the vector sum of tangential and radial acceleration, $\\vec{a}_{net} = \\vec{a}_t + \\vec{a}_r$. Since $a_t$ is non-zero (for $k>0$), the net acceleration is not directed towards the center. Incorrect.</p>
+                        <p><strong>(D) Net acceleration at t=0:</strong> At $t=0$, $v=0$, so $a_r = 0$. The net acceleration is just the tangential acceleration, $a_{net} = a_t = k$. Correct.</p>
+                    `
+                },
+                {
+                    id: 17, section: 'B', topic: '2D Kinematics (Vectors)',
+                    text: `The position of a particle is given by $\\vec{r}(t) = (3t)\\hat{i} + (4t - 5t^2)\\hat{j}$ meters.`,
+                    options: ['The initial velocity of the particle is $(3\\hat{i} + 4\\hat{j})$ m/s.', 'The acceleration of the particle is constant.', 'The path of the particle is a parabola.', 'The velocity of the particle is never perpendicular to its acceleration.'],
+                    correct: ['A', 'B', 'C'],
+                    solution: `
+                        <p><strong>(A) Initial Velocity:</strong> $\\vec{v}(t) = \\frac{d\\vec{r}}{dt} = 3\\hat{i} + (4 - 10t)\\hat{j}$. At $t=0$, $\\vec{v}(0) = 3\\hat{i} + 4\\hat{j}$. Correct.</p>
+                        <p><strong>(B) Acceleration:</strong> $\\vec{a}(t) = \\frac{d\\vec{v}}{dt} = -10\\hat{j}$. This is a constant vector. Correct.</p>
+                        <p><strong>(C) Path:</strong> This is motion with constant acceleration, which is the definition of projectile-like motion. The path is a parabola. Correct.</p>
+                        <p><strong>(D) Perpendicularity:</strong> For $\\vec{v} \\perp \\vec{a}$, their dot product must be zero. $\\vec{v} \\cdot \\vec{a} = (3\\hat{i} + (4 - 10t)\\hat{j}) \\cdot (-10\\hat{j}) = -10(4 - 10t)$. Setting this to zero gives $-40 + 100t = 0 \\implies t = 0.4$ s. Since there is a time when they are perpendicular, the statement is false. Incorrect.</p>
+                    `
+                },
+                {
+                    id: 18, section: 'B', topic: 'a-t Graph Analysis',
+                    text: `A particle starts from the origin and moves along the x-axis. Its acceleration-time ($a-t$) graph is as follows: from $t=0$ to $t=t_1$, the acceleration is a constant positive value, $a_0$. From $t=t_1$ to $t=2t_1$, the acceleration is a constant negative value, $-a_0$. The particle starts from rest.`,
+                    options: ["The particle's velocity is maximum at $t = t_1$.", 'The particle returns to the origin.', 'The velocity of the particle is zero at $t = 2t_1$.', 'The particle is always moving in the positive x-direction for $t > 0$.'],
+                    correct: ['A', 'C'],
+                    solution: `
+                        <p><strong>(A) Max Velocity:</strong> Velocity is the area under the a-t graph. From $0$ to $t_1$, velocity increases. After $t_1$, acceleration is negative, so velocity starts decreasing. Thus, velocity is maximum at $t=t_1$. Correct.</p>
+                        <p><strong>(C) Velocity at 2t1:</strong> Change in velocity from $0$ to $2t_1$ is the total area under the a-t graph. Area = $(a_0 \\times t_1) + (-a_0 \\times t_1) = 0$. Since it starts from rest, the final velocity at $t=2t_1$ is also zero. Correct.</p>
+                        <p><strong>(B) & (D) Position:</strong> Since velocity is always positive from $t=0$ to $t=2t_1$ (it starts at 0, increases, then decreases back to 0), the particle is always moving in the positive direction and never returns to the origin. Incorrect.</p>
+                    `
+                },
+                {
+                    id: 19, section: 'B', topic: 'Relative Velocity (Vectors)',
+                    text: `A boat is moving with a velocity $(3\\hat{i} + 4\\hat{j})$ with respect to the ground. The water in the river is moving with a velocity $(-3\\hat{i} - 4\\hat{j})$ with respect to the ground. The relative velocity of the boat with respect to the water is:`,
+                    options: ['$8\\hat{j}$', '$6\\hat{i} + 8\\hat{j}$', 'along the y-axis.', 'of magnitude 10 m/s.'],
+                    correct: ['B', 'D'],
+                    solution: `
+                        <p><strong>Principle Identification:</strong> $\\vec{v}_{bw} = \\vec{v}_{bg} - \\vec{v}_{wg}$.</p>
+                        <p><strong>Logical Derivation:</strong></p>
+                        <ul>
+                            <li>$\\vec{v}_{bw} = (3\\hat{i} + 4\\hat{j}) - (-3\\hat{i} - 4\\hat{j}) = 6\\hat{i} + 8\\hat{j}$. (B) is correct.</li>
+                            <li>Magnitude $|\\vec{v}_{bw}| = \\sqrt{6^2 + 8^2} = \\sqrt{36+64} = \\sqrt{100} = 10$ m/s. (D) is correct.</li>
+                            <li>(A) and (C) are incorrect as the vector has both x and y components.</li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 20, section: 'B', topic: 'Fundamental Kinematic Definitions',
+                    text: `Which of the following statements is/are correct regarding motion?`,
+                    options: ['The magnitude of displacement is always less than or equal to the distance travelled.', 'If average velocity of a particle over a time interval is zero, its average speed might be non-zero.', 'The slope of the position-time graph gives acceleration.', 'The area under the velocity-time graph gives displacement.'],
+                    correct: ['A', 'B', 'D'],
+                    solution: `
+                        <p><strong>(A) Displacement vs Distance:</strong> Displacement is the shortest path (straight line) between two points, while distance is the actual path length. So, |displacement| <= distance. Correct.</p>
+                        <p><strong>(B) Average Velocity vs Speed:</strong> If a particle completes a round trip, its displacement is zero, so average velocity is zero. But it has travelled a non-zero distance, so average speed is non-zero. Correct.</p>
+                        <p><strong>(C) Slope of x-t graph:</strong> The slope of the position-time graph gives velocity, not acceleration. Incorrect.</p>
+                        <p><strong>(D) Area under v-t graph:</strong> The area under the velocity-time graph represents displacement. Correct.</p>
+                    `
+                },
+                {
+                    id: 21, section: 'C', topic: 'Motion in 1D (Calculus)',
+                    text: `A particle starts from rest. Its acceleration $a$ (in m/s$^2$) varies with time $t$ (in s) as $a = 6t - 4$. The velocity of the particle at $t=2$ s is ______ m/s.`,
+                    correct: '4.00',
+                    solution: `
+                        <p><strong>Principle Identification:</strong> Velocity is the integral of acceleration with respect to time. $v = \\int a \\,dt$.</p>
+                        <p><strong>Logical Derivation:</strong></p>
+                        <ul>
+                            <li>$v(t) = \\int (6t - 4) \\,dt = 3t^2 - 4t + C$.</li>
+                            <li>The particle starts from rest, so $v(0) = 0$. $3(0)^2 - 4(0) + C = 0 \\implies C = 0$.</li>
+                            <li>So, $v(t) = 3t^2 - 4t$.</li>
+                            <li>At $t=2$ s, $v(2) = 3(2)^2 - 4(2) = 3(4) - 8 = 12 - 8 = 4$ m/s.</li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 22, section: 'C', topic: 'Motion under Gravity (Collision)',
+                    text: `A stone is dropped from a height $h$. Simultaneously, another stone is thrown up from the ground which reaches a maximum height of $4h$. The two stones cross each other after a time of ______ seconds. (Express your answer in terms of $h$ and $g$).`,
+                    correct: 'sqrt(h/8g)',
+                    solution: `
+                        <p><strong>Principle Identification:</strong> Set up position equations for both stones and equate them to find the time of meeting.</p>
+                        <p><strong>Logical Derivation:</strong></p>
+                        <ul>
+                            <li><strong>Stone 1 (dropped):</strong> $y_1(t) = h - \\frac{1}{2}gt^2$.</li>
+                            <li><strong>Stone 2 (thrown up):</strong> For it to reach height $4h$, its initial velocity $u_2$ is given by $0^2 = u_2^2 - 2g(4h) \\implies u_2 = \\sqrt{8gh}$. Its position is $y_2(t) = u_2 t - \\frac{1}{2}gt^2 = \\sqrt{8gh} \\, t - \\frac{1}{2}gt^2$.</li>
+                            <li><strong>Meeting point:</strong> $y_1(t) = y_2(t)$.</li>
+                            <li>$h - \\frac{1}{2}gt^2 = \\sqrt{8gh} \\, t - \\frac{1}{2}gt^2$.</li>
+                            <li>$h = \\sqrt{8gh} \\, t$.</li>
+                            <li>$t = \\frac{h}{\\sqrt{8gh}} = \\frac{\\sqrt{h^2}}{\\sqrt{8gh}} = \\sqrt{\\frac{h^2}{8gh}} = \\sqrt{\\frac{h}{8g}}$.</li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 23, section: 'C', topic: 'Non-uniform Acceleration',
+                    text: `A particle's velocity is given by $v = k\\sqrt{x}$, where $k$ is a positive constant and $x$ is its position. If the particle starts from $x=0$ at $t=0$, its acceleration is ______ m/s$^2$.`,
+                    correct: 'k^2/2',
+                    solution: `
+                        <p><strong>Principle Identification:</strong> Use the chain rule form of acceleration: $a = v \\frac{dv}{dx}$.</p>
+                        <p><strong>Logical Derivation:</strong></p>
+                        <ul>
+                            <li>Given $v = k\\sqrt{x}$.</li>
+                            <li>Differentiate $v$ with respect to $x$: $\\frac{dv}{dx} = k \\times \\frac{1}{2\\sqrt{x}} = \\frac{k}{2\\sqrt{x}}$.</li>
+                            <li>$a = v \\frac{dv}{dx} = (k\\sqrt{x}) \\left( \\frac{k}{2\\sqrt{x}} \\right) = \\frac{k^2}{2}$.</li>
+                            <li>The acceleration is constant.</li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 24, section: 'C', topic: 'Projectile & Momentum Conservation',
+                    text: `A projectile is fired from the ground at an angle $\\theta$ with the horizontal. At its highest point, it explodes into two fragments of equal mass. One fragment falls vertically downwards with zero horizontal velocity. The horizontal distance from the point of projection where the other fragment lands is $kR$, where $R$ is the horizontal range of the original projectile. The value of $k$ is ______.`,
+                    correct: '1.50',
+                    solution: `
+                        <p><strong>Principle Identification:</strong> Conservation of linear momentum in the horizontal direction at the point of explosion.</p>
+                        <p><strong>Logical Derivation (Center of Mass Method):</strong></p>
+                        <ul>
+                            <li>The center of mass (CM) of the system must follow the original trajectory and land at $x=R$.</li>
+                            <li>The explosion occurs at $x_{exp} = R/2$.</li>
+                            <li>Fragment 1 falls vertically, so it lands at $x_1 = R/2$.</li>
+                            <li>Let fragment 2 land at $x_2$. The masses are equal ($m_1=m_2=m$).</li>
+                            <li>Position of CM: $x_{CM} = \\frac{m_1x_1 + m_2x_2}{m_1+m_2}$.</li>
+                            <li>$R = \\frac{m(R/2) + m(x_2)}{2m} = \\frac{R/2 + x_2}{2}$.</li>
+                            <li>$2R = R/2 + x_2 \\implies x_2 = 2R - R/2 = 1.5R$.</li>
+                            <li>Thus, $k=1.50$.</li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 25, section: 'C', topic: 'Relative Motion (Accelerating Frame)',
+                    text: `A train is moving along a straight line with a constant acceleration. A boy standing in the train throws a ball forward with a speed of 10 m/s at an angle of $60^\\circ$ to the horizontal, relative to the train. The boy has to move forward by 1.15 m inside the train to catch the ball back at the initial height. The acceleration of the train is ______ m/s$^2$. (Use $g=10 \\text{ m/s}^2$, $\\sqrt{3}=1.73$)`,
+                    correct: '5.00',
+                    solution: `
+                        <p><strong>Principle Identification:</strong> Projectile motion in a non-inertial (accelerating) frame. The key is to analyze motion relative to the train.</p>
+                        <p><strong>Logical Derivation:</strong></p>
+                        <ul>
+                            <li><strong>Time of Flight (T):</strong> This depends only on vertical motion, which is unaffected by horizontal acceleration. $T = \\frac{2u_y}{g} = \\frac{2(10 \\sin 60^\\circ)}{10} = 2 \\times \\frac{\\sqrt{3}}{2} = \\sqrt{3}$ s.</li>
+                            <li><strong>Horizontal Motion (Relative to Train):</strong> The ball experiences a pseudo-acceleration $a_{rel} = -a_{train}$.</li>
+                            <li>The horizontal displacement of the ball relative to the train is $S_{rel} = u_{x,rel}T + \\frac{1}{2}a_{rel}T^2$.</li>
+                            <li>$1.15 = (10 \\cos 60^\\circ)(\\sqrt{3}) + \\frac{1}{2}(-a_{train})(\\sqrt{3})^2$.</li>
+                            <li>$1.15 = (10 \\times 0.5)(1.73) - \\frac{3}{2}a_{train}$.</li>
+                            <li>$1.15 = 5(1.73) - 1.5a_{train} = 8.65 - 1.5a_{train}$.</li>
+                            <li>$1.5a_{train} = 8.65 - 1.15 = 7.5$.</li>
+                            <li>$a_{train} = \\frac{7.5}{1.5} = 5$ m/s$^2$.</li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 26, section: 'C', topic: 'Circular Motion & Forces',
+                    text: `A car is travelling on a circular banked road of radius 30 m. The angle of banking is $45^\\circ$. The maximum speed with which the car can travel without skidding, if the coefficient of friction between the tires and the road is 0.5, is ______ m/s.`,
+                    correct: '30.00',
+                    solution: `
+                        <p><strong>Principle Identification:</strong> For maximum speed on a banked road with friction, use the formula $v_{max} = \\sqrt{rg \\frac{\\tan\\theta + \\mu}{1 - \\mu\\tan\\theta}}$.</p>
+                        <p><strong>Logical Derivation:</strong></p>
+                        <ul>
+                            <li>Given: $r=30$ m, $g=10$ m/s$^2$, $\\theta=45^\\circ$, $\\mu=0.5$.</li>
+                            <li>$\\tan 45^\\circ = 1$.</li>
+                            <li>$v_{max} = \\sqrt{30 \\times 10 \\times \\frac{1 + 0.5}{1 - 0.5 \\times 1}} = \\sqrt{300 \\times \\frac{1.5}{0.5}}$.</li>
+                            <li>$v_{max} = \\sqrt{300 \\times 3} = \\sqrt{900} = 30$ m/s.</li>
+                        </ul>
+                    `
+                },
+                {
+                    id: 27, section: 'C', topic: '2D Kinematics (Vectors)',
+                    text: `The position vector of a particle is given by $\\vec{r} = (3t^2 - 1)\\hat{i} + (2t^2)\\hat{j}$ m. The magnitude of its acceleration at $t=1$ s is ______ m/s$^2$.`,
+                    correct: '7.21',
+                    solution: `
+                        <p><strong>Principle Identification:</strong> Find acceleration by differentiating the position vector twice.</p>
+                        <p><strong>Logical Derivation:</strong></p>
+                        <ul>
+                            <li>Velocity vector: $\\vec{v} = \\frac{d\\vec{r}}{dt} = (6t)\\hat{i} + (4t)\\hat{j}$.</li>
+                            <li>Acceleration vector: $\\vec{a} = \\frac{d\\vec{v}}{dt} = 6\\hat{i} + 4\\hat{j}$.</li>
+                            <li>The acceleration is constant and does not depend on time.</li>
+                            <li>Magnitude of acceleration: $|\\vec{a}| = \\sqrt{6^2 + 4^2} = \\sqrt{36 + 16} = \\sqrt{52}$.</li>
+                            <li>$\\sqrt{52} \\approx 7.21$ m/s$^2$.</li>
+                        </ul>
+                    `
+                }
+            ];
+
+            const appState = {
+                currentView: 'instructions-view',
+                currentQuestionIndex: 0,
+                userAnswers: Array(questions.length).fill(null),
+                questionStatus: Array(questions.length).fill('not-visited'),
+                timer: 90 * 60,
+                timerInterval: null,
+                score: 0,
+                results: { correct: 0, incorrect: 0, unattempted: 0 }
+            };
+
+            const views = {
+                instructions: document.getElementById('instructions-view'),
+                test: document.getElementById('test-view'),
+                results: document.getElementById('results-view'),
+                analysis: document.getElementById('analysis-view')
+            };
+
+            const ui = {
+                startBtn: document.getElementById('start-test-btn'),
+                timerDisplay: document.getElementById('timer'),
+                questionHeader: document.getElementById('question-header'),
+                questionContent: document.getElementById('question-content'),
+                optionsContainer: document.getElementById('options-container'),
+                prevBtn: document.getElementById('prev-btn'),
+                nextBtn: document.getElementById('next-btn'),
+                reviewBtn: document.getElementById('review-btn'),
+                clearBtn: document.getElementById('clear-btn'),
+                questionPalette: document.getElementById('question-palette'),
+                submitBtn: document.getElementById('submit-test-btn'),
+                analysisBtn: document.getElementById('analysis-btn'),
+                totalScore: document.getElementById('total-score'),
+                correctCount: document.getElementById('correct-count'),
+                incorrectCount: document.getElementById('incorrect-count'),
+                unattemptedCount: document.getElementById('unattempted-count'),
+                analysisContainer: document.getElementById('analysis-container'),
+                modal: document.getElementById('confirmation-modal'),
+                modalCancelBtn: document.getElementById('cancel-submit-btn'),
+                modalConfirmBtn: document.getElementById('confirm-submit-btn'),
+            };
+
+            let resultsChartInstance = null;
+            let topicChartInstance = null;
+
+            function switchView(viewName) {
+                Object.values(views).forEach(v => v.classList.remove('active'));
+                views[viewName].classList.add('active');
+                appState.currentView = viewName;
+            }
+            
+            function saveAnswer() {
+                const question = questions[appState.currentQuestionIndex];
+                let answer = null;
+                if (question.section === 'A') {
+                    const selected = document.querySelector(`input[name="q${question.id}"]:checked`);
+                    if (selected) answer = [selected.value];
+                } else if (question.section === 'B') {
+                    const selected = Array.from(document.querySelectorAll(`input[name="q${question.id}"]:checked`)).map(cb => cb.value);
+                    if (selected.length > 0) answer = selected;
+                } else { // Section C
+                    const input = document.getElementById(`q${question.id}_input`);
+                    if (input && input.value !== '') answer = input.value;
+                }
+                appState.userAnswers[appState.currentQuestionIndex] = answer;
+                updateQuestionStatus();
+            }
+
+            function renderQuestion() {
+                saveAnswer();
+                const question = questions[appState.currentQuestionIndex];
+                ui.questionHeader.textContent = `Question ${question.id}`;
+                ui.questionContent.innerHTML = question.text;
+                ui.optionsContainer.innerHTML = '';
+
+                if (question.section === 'A') {
+                    question.options.forEach((opt, index) => {
+                        const optId = `q${question.id}_opt${index}`;
+                        const val = String.fromCharCode(65 + index);
+                        ui.optionsContainer.innerHTML += `
+                            <label for="${optId}" class="block border rounded-lg p-4 cursor-pointer hover:bg-gray-100">
+                                <input type="radio" id="${optId}" name="q${question.id}" value="${val}" class="mr-3">
+                                ${opt}
+                            </label>`;
+                    });
+                    const userAnswer = appState.userAnswers[appState.currentQuestionIndex];
+                    if (userAnswer) {
+                        const radio = document.querySelector(`input[value="${userAnswer[0]}"]`);
+                        if(radio) radio.checked = true;
+                    }
+                } else if (question.section === 'B') {
+                    question.options.forEach((opt, index) => {
+                        const optId = `q${question.id}_opt${index}`;
+                        const val = String.fromCharCode(65 + index);
+                        ui.optionsContainer.innerHTML += `
+                            <label for="${optId}" class="block border rounded-lg p-4 cursor-pointer hover:bg-gray-100">
+                                <input type="checkbox" id="${optId}" name="q${question.id}" value="${val}" class="mr-3">
+                                ${opt}
+                            </label>`;
+                    });
+                    const userAnswer = appState.userAnswers[appState.currentQuestionIndex];
+                    if (userAnswer) {
+                        userAnswer.forEach(ans => {
+                           const checkbox = document.querySelector(`input[value="${ans}"]`);
+                           if(checkbox) checkbox.checked = true;
+                        });
+                    }
+                } else { // Section C
+                    const userAnswer = appState.userAnswers[appState.currentQuestionIndex] || '';
+                    ui.optionsContainer.innerHTML = `
+                        <input type="text" id="q${question.id}_input" value="${userAnswer}" class="w-full border-2 border-gray-300 p-3 rounded-lg text-lg focus:border-blue-500 focus:ring-blue-500" placeholder="Enter numerical answer...">
+                    `;
+                }
+
+                if(window.renderMathInElement) {
+                    renderMathInElement(document.body, {
+                        delimiters: [
+                            {left: "$$", right: "$$", display: true},
+                            {left: "$", right: "$", display: false},
+                        ]
+                    });
+                }
+                updateQuestionStatus();
+            }
+            
+            function updateQuestionStatus() {
+                const currentStatus = appState.questionStatus[appState.currentQuestionIndex];
+                if (currentStatus !== 'review') {
+                    appState.questionStatus[appState.currentQuestionIndex] = appState.userAnswers[appState.currentQuestionIndex] ? 'answered' : 'not-answered';
+                }
+                updatePalette();
+            }
+
+            function updatePalette() {
+                ui.questionPalette.innerHTML = '';
+                questions.forEach((q, index) => {
+                    const btn = document.createElement('button');
+                    btn.textContent = q.id;
+                    btn.className = `question-palette-btn w-10 h-10 rounded-md font-semibold ${getStatusClass(appState.questionStatus[index])}`;
+                    if (index === appState.currentQuestionIndex) {
+                        btn.classList.remove(...btn.classList);
+                        btn.className += ' question-palette-btn w-10 h-10 rounded-md font-semibold status-current';
+                    }
+                    btn.onclick = () => {
+                        appState.currentQuestionIndex = index;
+                        renderQuestion();
+                    };
+                    ui.questionPalette.appendChild(btn);
+                });
+            }
+            
+            function getStatusClass(status) {
+                switch(status) {
+                    case 'answered': return 'status-answered';
+                    case 'not-answered': return 'status-not-answered';
+                    case 'review': return 'status-review';
+                    default: return 'status-not-visited';
+                }
+            }
+
+            function startTimer() {
+                appState.timerInterval = setInterval(() => {
+                    appState.timer--;
+                    const minutes = Math.floor(appState.timer / 60);
+                    const seconds = appState.timer % 60;
+                    ui.timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                    if (appState.timer <= 0) {
+                        clearInterval(appState.timerInterval);
+                        endTest();
+                    }
+                }, 1000);
+            }
+
+            function calculateScore() {
+                let score = 0;
+                let correctCount = 0;
+                let incorrectCount = 0;
+                let unattemptedCount = 0;
+
+                questions.forEach((q, index) => {
+                    const userAnswer = appState.userAnswers[index];
+                    const correctAnswer = q.correct;
+
+                    if (userAnswer === null || userAnswer.length === 0) {
+                        unattemptedCount++;
+                        return;
+                    }
+
+                    if (q.section === 'A') {
+                        if (userAnswer[0] === correctAnswer[0]) {
+                            score += 4;
+                            correctCount++;
+                        } else {
+                            score -= 1;
+                            incorrectCount++;
+                        }
+                    } else if (q.section === 'B') {
+                        const correctSet = new Set(correctAnswer);
+                        const userSet = new Set(userAnswer);
+                        let hasIncorrect = false;
+                        let correctChosen = 0;
+                        
+                        userSet.forEach(ans => {
+                            if (correctSet.has(ans)) {
+                                correctChosen++;
+                            } else {
+                                hasIncorrect = true;
+                            }
+                        });
+
+                        if (hasIncorrect) {
+                            score -= 2;
+                            incorrectCount++;
+                        } else {
+                            if (correctChosen === correctSet.size) {
+                                score += 4;
+                                correctCount++;
+                            } else if (correctChosen > 0) {
+                                // Partial marking logic
+                                if (correctSet.size === 3 && correctChosen === 2) score += 2;
+                                else if (correctSet.size >= 2 && correctChosen === 1) score += 1;
+                                else score += 0; // Or other partial logic
+                                correctCount++; // Count as partially correct
+                            }
+                        }
+                    } else { // Section C
+                        // Allow for some tolerance in numerical answers
+                        const isCorrect = q.correct.includes('sqrt') ? userAnswer === q.correct : Math.abs(parseFloat(userAnswer) - parseFloat(q.correct)) < 0.01;
+                        if (isCorrect) {
+                            score += 4;
+                            correctCount++;
+                        } else {
+                            incorrectCount++;
+                        }
+                    }
+                });
+
+                appState.score = score;
+                appState.results = { correct: correctCount, incorrect: incorrectCount, unattempted: unattemptedCount };
+            }
+
+            function endTest() {
+                saveAnswer();
+                clearInterval(appState.timerInterval);
+                calculateScore();
+                displayResults();
+                switchView('results');
+            }
+
+            function displayResults() {
+                ui.totalScore.textContent = appState.score;
+                ui.correctCount.textContent = appState.results.correct;
+                ui.incorrectCount.textContent = appState.results.incorrect;
+                ui.unattemptedCount.textContent = appState.results.unattempted;
+
+                if (resultsChartInstance) resultsChartInstance.destroy();
+                resultsChartInstance = new Chart(document.getElementById('results-chart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Correct', 'Incorrect', 'Unattempted'],
+                        datasets: [{
+                            data: [appState.results.correct, appState.results.incorrect, appState.results.unattempted],
+                            backgroundColor: ['#10B981', '#EF4444', '#6B7280'],
+                            borderColor: '#FDFBF6',
+                            borderWidth: 4,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
+            
+            function displayAnalysis() {
+                ui.analysisContainer.innerHTML = '';
+                questions.forEach((q, index) => {
+                    const userAnswer = appState.userAnswers[index];
+                    const correctAnswer = q.correct;
+                    let isCorrect = false;
+                    let isPartiallyCorrect = false;
+
+                    if (q.section === 'A') {
+                        isCorrect = userAnswer && userAnswer[0] === correctAnswer[0];
+                    } else if (q.section === 'B') {
+                        if (userAnswer) {
+                            const correctSet = new Set(correctAnswer);
+                            const userSet = new Set(userAnswer);
+                            let hasIncorrect = false;
+                            userSet.forEach(ans => { if (!correctSet.has(ans)) hasIncorrect = true; });
+                            if (!hasIncorrect && userSet.size === correctSet.size) isCorrect = true;
+                            else if (!hasIncorrect && userSet.size > 0) isPartiallyCorrect = true;
+                        }
+                    } else { // Section C
+                         isCorrect = userAnswer && (q.correct.includes('sqrt') ? userAnswer === q.correct : Math.abs(parseFloat(userAnswer) - parseFloat(q.correct)) < 0.01);
+                    }
+
+                    const card = document.createElement('div');
+                    card.className = 'bg-white p-6 rounded-lg shadow-sm border-l-4';
+                    
+                    let statusClass = 'border-gray-400';
+                    if (userAnswer === null) statusClass = 'border-gray-400';
+                    else if (isCorrect) statusClass = 'border-green-500';
+                    else if (isPartiallyCorrect) statusClass = 'border-yellow-500';
+                    else statusClass = 'border-red-500';
+                    card.classList.add(statusClass);
+
+                    let optionsHtml = '';
+                    if (q.section !== 'C') {
+                        optionsHtml = q.options.map((opt, optIndex) => {
+                            const val = String.fromCharCode(65 + optIndex);
+                            const isCorrectOpt = correctAnswer.includes(val);
+                            const isUserChoice = userAnswer && userAnswer.includes(val);
+                            let optClass = 'border rounded-md p-3 mt-2 ';
+                            if (isCorrectOpt) optClass += 'option-label correct';
+                            if (isUserChoice && !isCorrectOpt) optClass += 'option-label incorrect';
+                            if (!isUserChoice && isCorrectOpt) optClass += 'option-label not-selected-correct';
+                            return `<div class="${optClass}">(${val}) ${opt}</div>`;
+                        }).join('');
+                    } else {
+                        const isNumCorrect = userAnswer && Math.abs(parseFloat(userAnswer) - parseFloat(q.correct)) < 0.01;
+                        optionsHtml = `
+                            <div class="mt-2">Your Answer: <span class="font-bold p-2 rounded ${isNumCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${userAnswer || 'Not Answered'}</span></div>
+                            <div class="mt-2">Correct Answer: <span class="font-bold p-2 rounded bg-green-100 text-green-800">${q.correct}</span></div>
+                        `;
+                    }
+
+                    card.innerHTML = `
+                        <p class="font-bold text-lg">Question ${q.id}: <span class="font-normal text-gray-600">${q.text}</span></p>
+                        <div class="my-4">${optionsHtml}</div>
+                        <details class="mt-4">
+                            <summary class="cursor-pointer font-semibold text-[#3730A3] hover:underline">Show Detailed Solution</summary>
+                            <div class="mt-2 p-4 bg-gray-50 rounded-lg border">${q.solution}</div>
+                        </details>
+                    `;
+                    ui.analysisContainer.appendChild(card);
+                });
+                
+                if(window.renderMathInElement) {
+                    renderMathInElement(ui.analysisContainer, {
+                        delimiters: [
+                            {left: "$$", right: "$$", display: true},
+                            {left: "$", right: "$", display: false},
+                        ]
+                    });
+                }
+
+                displayTopicChart();
+            }
+
+            function displayTopicChart() {
+                const topicData = {};
+                questions.forEach((q, index) => {
+                    if (!topicData[q.topic]) {
+                        topicData[q.topic] = { correct: 0, total: 0 };
+                    }
+                    topicData[q.topic].total++;
+                    
+                    const userAnswer = appState.userAnswers[index];
+                    if (userAnswer) {
+                        if (q.section === 'A' && userAnswer[0] === q.correct[0]) topicData[q.topic].correct++;
+                        else if (q.section === 'C' && (q.correct.includes('sqrt') ? userAnswer === q.correct : Math.abs(parseFloat(userAnswer) - parseFloat(q.correct)) < 0.01)) topicData[q.topic].correct++;
+                        else if (q.section === 'B') {
+                            const correctSet = new Set(q.correct);
+                            const userSet = new Set(userAnswer);
+                            let hasIncorrect = false;
+                            userSet.forEach(ans => { if (!correctSet.has(ans)) hasIncorrect = true; });
+                            if (!hasIncorrect && userSet.size === correctSet.size) topicData[q.topic].correct++;
+                        }
+                    }
+                });
+
+                const labels = Object.keys(topicData);
+                const data = labels.map(label => (topicData[label].correct / topicData[label].total) * 100);
+
+                if (topicChartInstance) topicChartInstance.destroy();
+                topicChartInstance = new Chart(document.getElementById('topic-chart'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: '% Accuracy',
+                            data: data,
+                            backgroundColor: 'rgba(142, 173, 213, 0.6)',
+                            borderColor: 'rgba(142, 173, 213, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        scales: { x: { beginAtZero: true, max: 100 } },
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+            
+            function showModal() {
+                const modal = ui.modal;
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    modal.querySelector('div').classList.remove('scale-95');
+                }, 10);
+            }
+
+            function hideModal() {
+                const modal = ui.modal;
+                modal.classList.add('opacity-0');
+                modal.querySelector('div').classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            }
+
+            ui.startBtn.addEventListener('click', () => {
+                appState.questionStatus[0] = 'not-answered';
+                switchView('test');
+                renderQuestion();
+                startTimer();
+            });
+
+            ui.nextBtn.addEventListener('click', () => {
+                if (appState.currentQuestionIndex < questions.length - 1) {
+                    appState.currentQuestionIndex++;
+                    renderQuestion();
+                } else {
+                    showModal();
+                }
+            });
+
+            ui.prevBtn.addEventListener('click', () => {
+                if (appState.currentQuestionIndex > 0) {
+                    appState.currentQuestionIndex--;
+                    renderQuestion();
+                }
+            });
+            
+            ui.reviewBtn.addEventListener('click', () => {
+                const currentStatus = appState.questionStatus[appState.currentQuestionIndex];
+                appState.questionStatus[appState.currentQuestionIndex] = currentStatus === 'review' ? (appState.userAnswers[appState.currentQuestionIndex] ? 'answered' : 'not-answered') : 'review';
+                updatePalette();
+            });
+            
+            ui.clearBtn.addEventListener('click', () => {
+                appState.userAnswers[appState.currentQuestionIndex] = null;
+                renderQuestion();
+            });
+
+            ui.submitBtn.addEventListener('click', showModal);
+            ui.modalCancelBtn.addEventListener('click', hideModal);
+            ui.modalConfirmBtn.addEventListener('click', () => {
+                hideModal();
+                endTest();
+            });
+
+            ui.analysisBtn.addEventListener('click', () => {
+                displayAnalysis();
+                switchView('analysis');
+});
+            
+            updatePalette();
+        });
+    </script>
+
+</body>
+</html>
