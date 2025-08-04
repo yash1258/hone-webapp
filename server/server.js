@@ -7,17 +7,18 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 const pdf = require('pdf-parse');
 const fs = require('fs');
-// NEW: Import the Google Generative AI package
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+// NEW: Import and configure dotenv to manage environment variables
+require('dotenv').config();
 
 // --- 2. Initialize the Application & AI ---
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// IMPORTANT: Add your Gemini API Key here
-const GEMINI_API_KEY = 'AIzaSyAkDSULpqdL4sdRNkpRNxvHEKtt6P9_Gb0';
+// SECURE: Load API Key from .env file
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro"});
 
 const upload = multer({ dest: 'uploads/' });
 
@@ -26,7 +27,8 @@ app.use(cors());
 app.use(express.json());
 
 // --- 4. Connect to MongoDB ---
-const dbConnectionString = 'mongodb+srv://orphis:hone1!@cluster0.vn8sntc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+// SECURE: Load Connection String from .env file
+const dbConnectionString = process.env.DB_CONNECTION_STRING;
 mongoose.connect(dbConnectionString)
   .then(() => console.log('✅ Successfully connected to MongoDB Atlas.'))
   .catch(err => console.error('❌ Could not connect to MongoDB Atlas.', err));
